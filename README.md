@@ -25,3 +25,7 @@ proccesor status flags
 
 for reseting
 [www.c64-wiki.com/wiki/Reset_(Process)](www.c64-wiki.com/wiki/Reset_(Process))
+
+### TODO for first video
+
+convert switch and case to if and else
