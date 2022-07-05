@@ -40,6 +40,7 @@ typedef struct CPU
     // to reset cpu
     void Reset()
     {
+        printf("Hello World\n");
     }
 
 } CPU;
