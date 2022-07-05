@@ -9,8 +9,8 @@
 //using Word = unsigned short; // 2 bytes or 16 bits
 /*for c*/
 // using uint16_t for platform agnostic
-typedef uint8_t Byte;
-typedef uint16_t Word;
+typedef uint8_t Byte; // u8
+typedef uint16_t Word; // u16
 
 typedef uint8_t u8;
 typedef uint16_t u16;

@@ -72,9 +72,68 @@ typedef struct CPU
         memory.initialize();
     }
 
-    void execute(u32 ticks, MEM& memory)
+    u8 fetchByte(u32& cycles, MEM& memory)
     {
+       u8 data = memory[PC];
+       PC++;
+       cycles--;
+       return data;
+    }
 
+    // opcodes
+    // instruction load accumaltor immediate mode
+    // this according to https://web.archive.org/web/20210501043555/http://www.obelisk.me.uk/6502/reference.html#LDA as an op code of $A9 = 0xA9
+    // Loads a byte of memory into the accumulator setting the zero and negative flags as appropriate.
+    static constexpr u8 INS_LDA_IM = 0xA9;
+
+    void execute(u32 cycles, MEM& memory)
+    {
+        // to execute read more in https://web.archive.org/web/20210514033221/http://obelisk.me.uk/6502/instructions.html
+
+        /*load accumaltor*/
+        // https://web.archive.org/web/20210501043555/http://www.obelisk.me.uk/6502/reference.html#LDA
+        // fetches  bytes, and fetches instructions and decrement cycles to stop executing
+        while (cycles > 0)
+        {
+            u8 ins = fetchByte(cycles, memory); // ins = instruction
+            switch(ins)
+            {
+                case INS_LDA_IM:
+                {
+                    // Loads a byte of memory into the accumulator setting the zero and negative flags as appropriate.
+                    // get another byte and store it in value
+                    u8 value = fetchByte(cycles, memory);
+                    // set the A register with the value
+                    A = value;
+                    // set the 0 and negative flags as appopriate as show here
+                    // set Z = 1 if A = 0
+                    // smaller c code
+                    // Z = (A == 0)
+                    if (A == 0)
+                    {
+                        Z = 1;
+                    }
+                    else
+                    {
+                        Z = 0;
+                    }
+                    // set if bit 7 of A is set
+                    // 0b... is the symbol for binary
+                    // smaller c code
+                    // N = (A & 0b10000000) > 0
+                    // testing if A : 7 > 0 -> fails
+                    if (A & 0b10000000 > 0)
+                    {
+                        N = 1;
+                    }
+                    else
+                    {
+                        N = 0;
+                    }
+                } 
+                break;
+            }
+        }
     }
 
 } CPU;

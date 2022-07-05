@@ -6,14 +6,21 @@ typedef struct MEM
 
     // get some memory
     static constexpr u32 MAX_MEM = 1024 * 64;
-    u8 Data[MAX_MEM];
+    u8 data[MAX_MEM];
     
     void initialize()
     {
         for (u32 i = 0; i < MAX_MEM; i++)
         {
-            Data[i] = 0;
+            data[i] = 0;
         }
+    }
+
+    // read 1 byte
+    u8 operator[](u32 address) const
+    {
+        // asset here address is < MAX_MEM
+        return data[address];
     }
 
 } MEM;

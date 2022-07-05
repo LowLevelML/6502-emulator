@@ -21,5 +21,6 @@ int main()
     cpu.reset(mem);
     // execute
     cpu.execute(2, mem);
+
     return 0;
 }
