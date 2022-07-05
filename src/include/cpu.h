@@ -1,5 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
+#ifndef CPU_DOT_H
+#define CPU_DOT_H
 
 // for c++ data types values take a look at https://www.tutorialspoint.com/cprogramming/c_data_types.htm and 
 
@@ -11,7 +11,7 @@ typedef unsigned char Byte;
 typedef unsigned short Word;
 // For the registers and why I am using a certain amount of bits or bytes take a look at: https://web.archive.org/web/20210501031403/http://www.obelisk.me.uk/6502/registers.html
 
-struct CPU
+typedef struct CPU
 {
     /*Define Program Counter*/
     Word PC; // program counter which is 16 bit register
@@ -36,9 +36,14 @@ struct CPU
     Byte B : 1; // break command
     Byte V : 1; // overflow
     Byte N : 1; // negative
-};
 
-int main()
-{
-    return 0;
-}
+    // to reset cpu
+    void Reset()
+    {
+    }
+
+} CPU;
+
+extern CPU cpu;
+
+#endif
