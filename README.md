@@ -22,3 +22,6 @@ These are present in the code
 proccesor status flags
 
 ![proccesor_status_register_flags](./assets/proccesor_status_register_flags.png)
+
+for reseting
+[www.c64-wiki.com/wiki/Reset_(Process)](www.c64-wiki.com/wiki/Reset_(Process))
