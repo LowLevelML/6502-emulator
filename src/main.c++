@@ -20,6 +20,18 @@ int main()
     // also set memory to 0
     cpu.reset(mem);
     // execute
+
+    // start - testing little program by hardcoding
+    // 0xFFFC as that is where we are going to start executing memory I think mentioned here https://www.c64-wiki.com/wiki/Reset_(Process) or in the 6502 booklet previous page
+    mem[0xFFFC] = CPU::INS_LDA_IM;
+    mem[0xFFFC] = 0x42; // in decimel it is 66
+    /*
+    current output: 
+    Error: Instruction not handled or present. Instruction in decimel: 66 or in hex: 42
+    Error: Instruction not handled or present. Instruction in decimel: 0 or in hex: 0
+    */
+    // end - testing little program
+
     cpu.execute(2, mem);
 
     return 0;

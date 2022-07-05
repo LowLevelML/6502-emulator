@@ -96,6 +96,7 @@ typedef struct CPU
         while (cycles > 0)
         {
             u8 ins = fetchByte(cycles, memory); // ins = instruction
+            // try to change it to if and else later
             switch(ins)
             {
                 case INS_LDA_IM:
@@ -130,8 +131,11 @@ typedef struct CPU
                     {
                         N = 0;
                     }
-                } 
-                break;
+                } break;
+                default:
+                {
+                    printf("%s%d%s%X\n", "Error: Instruction not handled or present. Instruction in decimel: ", ins, " or in hex: ", ins);
+                } break;
             }
         }
     }

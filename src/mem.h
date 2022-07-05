@@ -23,6 +23,13 @@ typedef struct MEM
         return data[address];
     }
 
+    // write 1 byte
+    u8& operator[](u32 address)
+    {
+        // asset here address is < MAX_MEM
+        return data[address];
+    }
+
 } MEM;
 
 extern MEM mem;
