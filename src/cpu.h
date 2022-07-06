@@ -74,17 +74,58 @@ typedef struct CPU
 
     u8 fetchByte(u32& cycles, MEM& memory)
     {
-       u8 data = memory[PC];
-       PC++;
-       cycles--;
-       return data;
+        u8 data = memory[PC];
+        PC++;
+        cycles--;
+        return data;
     }
 
-    // opcodes
+    u8 readByte(u32& cycles, u8 address, MEM& memory)
+    {
+	    u8 data = memory[address];
+        cycles--;
+        return data;
+    }
+
+    void LDAsetStatus()
+    {
+        // set the 0 and negative flags as appopriate as show here
+        // set Z = 1 if A = 0
+        // smaller c code
+        Z = (A == 0);
+        /*
+        if (A == 0)
+        {
+            Z = 1;
+        }
+        else
+        {
+            Z = 0;
+        }
+        */
+        // set if bit 7 of A is set
+        // 0b... is the symbol for binary
+        // smaller c code
+        N = (A & 0b10000000) > 0;
+        // testing if A : 7 > 0 -> fails
+        /*
+        if (A & 0b10000000 > 0)
+        {
+            N = 1;
+        }
+        else
+        {
+            N = 0;
+        }
+        */
+    }
+    /* opcodes */
     // instruction load accumaltor immediate mode
     // this according to https://web.archive.org/web/20210501043555/http://www.obelisk.me.uk/6502/reference.html#LDA as an op code of $A9 = 0xA9
     // Loads a byte of memory into the accumulator setting the zero and negative flags as appropriate.
     static constexpr u8 INS_LDA_IM = 0xA9;
+    static constexpr u8 INS_LDA_ZP = 0xA5;
+    /* opcodes - end*/
 
     void execute(u32 cycles, MEM& memory)
     {
@@ -97,6 +138,47 @@ typedef struct CPU
         {
             u8 ins = fetchByte(cycles, memory); // ins = instruction
             // try to change it to if and else later
+
+            /*
+            if (ins == INS_LDA_IM)
+            {
+                // Loads a byte of memory into the accumulator setting the zero and negative flags as appropriate.
+                // get another byte and store it in value
+                u8 value = fetchByte(cycles, memory);
+                // set the A register with the value
+                A = value;
+                // set the 0 and negative flags as appopriate as show here
+                // set Z = 1 if A = 0
+                // smaller c code
+                // Z = (A == 0)
+                if (A == 0)
+                {
+                    Z = 1;
+                }
+                else
+                {
+                    Z = 0;
+                }
+                // set if bit 7 of A is set
+                // 0b... is the symbol for binary
+                // smaller c code
+                // N = (A & 0b10000000) > 0
+                // testing if A : 7 > 0 -> fails
+                if (A & 0b10000000 > 0)
+                {
+                    N = 1;
+                }
+                else
+                {
+                    N = 0;
+                }
+            }
+            else
+            {
+                printf("%s%d%s%X\n", "Error: Instruction not handled or present. Instruction in decimel: ", ins, " or in hex: ", ins);
+            }
+            */
+            // switch case is faster
             switch(ins)
             {
                 case INS_LDA_IM:
@@ -106,31 +188,13 @@ typedef struct CPU
                     u8 value = fetchByte(cycles, memory);
                     // set the A register with the value
                     A = value;
-                    // set the 0 and negative flags as appopriate as show here
-                    // set Z = 1 if A = 0
-                    // smaller c code
-                    // Z = (A == 0)
-                    if (A == 0)
-                    {
-                        Z = 1;
-                    }
-                    else
-                    {
-                        Z = 0;
-                    }
-                    // set if bit 7 of A is set
-                    // 0b... is the symbol for binary
-                    // smaller c code
-                    // N = (A & 0b10000000) > 0
-                    // testing if A : 7 > 0 -> fails
-                    if (A & 0b10000000 > 0)
-                    {
-                        N = 1;
-                    }
-                    else
-                    {
-                        N = 0;
-                    }
+                    LDAsetStatus();
+                } break;
+                case INS_LDA_ZP:
+                {
+                    u8 zeroPageAddr = fetchByte(cycles, memory);
+                    A = readByte(cycles, zeroPageAddr, memory);
+                    LDAsetStatus();
                 } break;
                 default:
                 {
