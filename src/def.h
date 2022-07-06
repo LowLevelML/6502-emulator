@@ -1,6 +1,7 @@
 #ifndef DEFBITS_DOT_H
 #define DEFBITS_DOT_H
 
+#define PLATFORM_BIG_ENDIAN (!(union { uint16_t u16; unsigned char c; }){ .u16 = 1 }.c)
 // for c++ data types values take a look at https://www.tutorialspoint.com/cprogramming/c_data_types.htm and 
 
 /*Define byte and 2 bytes*/

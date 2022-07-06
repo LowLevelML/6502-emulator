@@ -80,9 +80,33 @@ typedef struct CPU
         return data;
     }
 
+    u16 fetchWord(u32& cycles, MEM& memory)
+    {
+        // 6502 is little endian
+        // first byte we read is least significant byte of the data
+        u16 data = memory[PC];
+        PC++;
+        
+        // second time we are going to read but this time we are going to shift it up by 8 bits or 1 byte
+        data |= (memory[PC] << 8);
+        PC++;
+
+        cycles += 2;
+        // if you want to handles endianess you would have to swap bytes here
+        // if platform big endian defined in def.h
+        if (PLATFORM_BIG_ENDIAN)
+        {
+            // swapBytesInWord(data) -> swap bytes in u16 
+            // using byteswap.h
+            __bswap_16(data);
+        }
+
+        return data;
+    }
+
     u8 readByte(u32& cycles, u8 address, MEM& memory)
     {
-	    u8 data = memory[address];
+        u8 data = memory[address];
         cycles--;
         return data;
     }
@@ -123,8 +147,14 @@ typedef struct CPU
     // instruction load accumaltor immediate mode
     // this according to https://web.archive.org/web/20210501043555/http://www.obelisk.me.uk/6502/reference.html#LDA as an op code of $A9 = 0xA9
     // Loads a byte of memory into the accumulator setting the zero and negative flags as appropriate.
-    static constexpr u8 INS_LDA_IM = 0xA9;
-    static constexpr u8 INS_LDA_ZP = 0xA5;
+    static constexpr u8 
+        INS_LDA_IM = 0xA9, 
+        INS_LDA_ZP = 0xA5,
+        INS_LDA_ZPX = 0xB5;
+    
+    static constexpr u8
+        //INS_JSR_ABS = 0x20; // since only one
+        INS_JSR = 0x20;
     /* opcodes - end*/
 
     void execute(u32 cycles, MEM& memory)
@@ -137,50 +167,9 @@ typedef struct CPU
         while (cycles > 0)
         {
             u8 ins = fetchByte(cycles, memory); // ins = instruction
-            // try to change it to if and else later
-
-            /*
-            if (ins == INS_LDA_IM)
-            {
-                // Loads a byte of memory into the accumulator setting the zero and negative flags as appropriate.
-                // get another byte and store it in value
-                u8 value = fetchByte(cycles, memory);
-                // set the A register with the value
-                A = value;
-                // set the 0 and negative flags as appopriate as show here
-                // set Z = 1 if A = 0
-                // smaller c code
-                // Z = (A == 0)
-                if (A == 0)
-                {
-                    Z = 1;
-                }
-                else
-                {
-                    Z = 0;
-                }
-                // set if bit 7 of A is set
-                // 0b... is the symbol for binary
-                // smaller c code
-                // N = (A & 0b10000000) > 0
-                // testing if A : 7 > 0 -> fails
-                if (A & 0b10000000 > 0)
-                {
-                    N = 1;
-                }
-                else
-                {
-                    N = 0;
-                }
-            }
-            else
-            {
-                printf("%s%d%s%X\n", "Error: Instruction not handled or present. Instruction in decimel: ", ins, " or in hex: ", ins);
-            }
-            */
-            // switch case is faster
             switch(ins)
             {
+                /*START LDA START*/
                 case INS_LDA_IM:
                 {
                     // Loads a byte of memory into the accumulator setting the zero and negative flags as appropriate.
@@ -196,6 +185,32 @@ typedef struct CPU
                     A = readByte(cycles, zeroPageAddr, memory);
                     LDAsetStatus();
                 } break;
+                case INS_LDA_ZPX:
+                {
+                    u8 zeroPageXAddr = fetchByte(cycles, memory);
+                    // add x value to zeroPageXAddr
+                    zeroPageXAddr += X;
+                    cycles--;
+                    A = readByte(cycles, zeroPageXAddr, memory);
+                    LDAsetStatus();
+                } break;
+                /*END LDA END*/
+                /*START JSR START*/
+                case INS_JSR:
+                {
+                    u16 subAddr = fetchWord(cycles, memory);
+                    // jsr istruction pushes the address - 1 to the return point on the stack
+                    // return point is where we are then -1
+                    memory[SP] = PC - 1;
+                    // incremet SP
+                    SP += 2;
+                    // then set PC to target memory address
+                    PC = subAddr;
+                    // decreemnt cycles
+                    cycles--;
+                } break;
+                /*END JSR END*/
+                // else case
                 default:
                 {
                     printf("%s%d%s%X\n", "Error: Instruction not handled or present. Instruction in decimel: ", ins, " or in hex: ", ins);
